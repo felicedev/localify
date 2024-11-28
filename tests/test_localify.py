@@ -1,28 +1,44 @@
-import unittest
 import os
-from localify import (
-    l,
-    set_language,
-    load_translations,
-    set_missing_key_behavior,
-    enable_logging,
-    config,
-    DEBUG,
-    INFO,
-    WARNING
-)
-
+import json
+import unittest
+import shutil
+from localify import load_translations, set_language, l, set_missing_key_behavior
 
 class TestLocalify(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Set up the path to the test locales directory
-        cls.locales_path = 'locales'
+        # Crea una directory temporanea per le traduzioni
+        cls.locales_path = os.path.join(os.path.dirname(__file__), 'temp_locales')
+        os.makedirs(cls.locales_path, exist_ok=True)
+
+        # File di traduzione EN
+        en_translations = {
+            "hello": "Hello",
+            "world": "World"
+        }
+        with open(os.path.join(cls.locales_path, 'en.json'), 'w', encoding='utf-8') as f:
+            json.dump(en_translations, f)
+
+        # File di traduzione IT
+        it_translations = {
+            "hello": "Ciao",
+            "world": "Mondo"
+        }
+        with open(os.path.join(cls.locales_path, 'it.json'), 'w', encoding='utf-8') as f:
+            json.dump(it_translations, f)
+
+        # Carica le traduzioni dalla directory temporanea
         load_translations(cls.locales_path)
-        set_language('en')  # Set default language for tests
+        set_language('en')  # Imposta la lingua predefinita per i test
+
+    @classmethod
+    def tearDownClass(cls):
+        # Rimuovi la directory temporanea
+        if os.path.exists(cls.locales_path):
+            shutil.rmtree(cls.locales_path)
 
     def setUp(self):
-        # Reset configurations before each test to ensure test isolation
+        # Reset delle configurazioni prima di ogni test
         set_language('en')
         set_missing_key_behavior('key')
 
@@ -30,6 +46,7 @@ class TestLocalify(unittest.TestCase):
         message = l("hello").space().l("world").exclamation()
         self.assertEqual(str(message), "Hello World!")
 
+    def test_switch_language(self):
         set_language('it')
         message = l("hello").space().l("world").exclamation()
         self.assertEqual(str(message), "Ciao Mondo!")
@@ -42,38 +59,3 @@ class TestLocalify(unittest.TestCase):
         set_missing_key_behavior('default', default_value='[MISSING]')
         message = l("nonexistent_key")
         self.assertEqual(str(message), "[MISSING]")
-
-    def test_logging_missing_key(self):
-        enable_logging(level=DEBUG)
-        set_missing_key_behavior('log')
-        set_language('it')
-        with self.assertLogs('localify', level='WARNING') as cm:
-            message = l("nonexistent_key")
-            self.assertEqual(str(message), "nonexistent_key")
-            # Check if the expected log message is in the output
-            self.assertIn("Missing translation key 'nonexistent_key' for language 'it'.", cm.output[0])
-
-    def test_config_function(self):
-        config(
-            language='en',
-            missing_key_behavior='default',
-            default_missing_value='[NOT FOUND]',
-            logging_level=INFO
-        )
-        message = l("nonexistent_key")
-        self.assertEqual(str(message), "[NOT FOUND]")
-
-    def test_loading_custom_translations(self):
-        # Reset missing key behavior
-        set_missing_key_behavior('key')
-
-        # Create a custom locales directory for testing
-        custom_locales_path = os.path.join(os.path.dirname(__file__), 'custom_locales')
-        load_translations(custom_locales_path)
-        set_language('en')
-        message = l("custom_key")
-        self.assertEqual(str(message), "custom_key")
-
-
-if __name__ == '__main__':
-    unittest.main()

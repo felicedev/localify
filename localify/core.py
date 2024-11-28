@@ -27,20 +27,15 @@ def set_language(lang):
     """
     Set the current language. If translations have not been loaded,
     it loads them from the default path.
-
     Args:
         lang (str): The language code to set (e.g., 'en', 'it').
     """
     global _current_language
     _current_language = lang
 
-    # If translations have not been loaded, or only with the default path
+    # Se le traduzioni non sono state caricate, caricale dal percorso di default
     if not translations_loaded():
         load_translations()
-    elif not _custom_load_translations_called:
-        # If load_translations() was called but with the default path
-        load_translations()
-
 def set_missing_key_behavior(behavior, default_value=None):
     """
     Configure how to handle missing translation keys.
