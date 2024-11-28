@@ -12,11 +12,12 @@ from localify import (
     WARNING
 )
 
+
 class TestLocalify(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Set up the path to the test locales directory
-        cls.locales_path = os.path.join(os.path.dirname(__file__), 'locales')
+        cls.locales_path = 'locales'
         load_translations(cls.locales_path)
         set_language('en')  # Set default language for tests
 
@@ -72,6 +73,7 @@ class TestLocalify(unittest.TestCase):
         set_language('en')
         message = l("custom_key")
         self.assertEqual(str(message), "custom_key")
+
 
 if __name__ == '__main__':
     unittest.main()
