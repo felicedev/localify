@@ -29,7 +29,7 @@ pip install localify
 To Install the package locally:
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/localify.git
+git clone https://github.com/felicedev/localify.git
 cd localify
 ```
 
